@@ -198,6 +198,43 @@ func (c *Config) PasswordCredentialsToken(ctx context.Context, username, passwor
 	return retrieveToken(ctx, c, v)
 }
 
+// PlainPasswordCredentialsToken converts a resource owner username and plain password
+// pair into a token.
+//
+// This call should be considered DEPRECATED and only be used for backwards compatibility.
+//
+// The provided context optionally controls which HTTP client is used. See the HTTPClient variable.
+func (c *Config) PlainPasswordCredentialsToken(ctx context.Context, username, password string) (*Token, error) {
+	v := url.Values{
+		"grant_type": {"password_plain"},
+		"username":   {username},
+		"password":   {password},
+	}
+	if len(c.Scopes) > 0 {
+		v.Set("scope", strings.Join(c.Scopes, " "))
+	}
+	return retrieveToken(ctx, c, v)
+}
+
+// HashCredentialsToken converts a resource owner customer hash
+// pair into a token.
+//
+// This call should be considered DEPRECATED and only be used for backwards compatibility.
+// It additionally should only be used for internal authorization and never be made available
+// to the customer or any 3rd party.
+//
+// The provided context optionally controls which HTTP client is used. See the HTTPClient variable.
+func (c *Config) HashCredentialsToken(ctx context.Context, custHash string) (*Token, error) {
+	v := url.Values{
+		"grant_type": {"hash"},
+		"userhash":   {custHash},
+	}
+	if len(c.Scopes) > 0 {
+		v.Set("scope", strings.Join(c.Scopes, " "))
+	}
+	return retrieveToken(ctx, c, v)
+}
+
 // Exchange converts an authorization code into a token.
 //
 // It is used after a resource provider redirects the user back
