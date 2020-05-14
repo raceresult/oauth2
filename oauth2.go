@@ -216,8 +216,7 @@ func (c *Config) PlainPasswordCredentialsToken(ctx context.Context, username, pa
 	return retrieveToken(ctx, c, v)
 }
 
-// HashCredentialsToken converts a resource owner customer hash
-// pair into a token.
+// HashCredentialsToken converts a resource owner customer hash into a token.
 //
 // This call should be considered DEPRECATED and only be used for backwards compatibility.
 // It additionally should only be used for internal authorization and never be made available
@@ -228,6 +227,21 @@ func (c *Config) HashCredentialsToken(ctx context.Context, custHash string) (*To
 	v := url.Values{
 		"grant_type": {"hash"},
 		"userhash":   {custHash},
+	}
+	if len(c.Scopes) > 0 {
+		v.Set("scope", strings.Join(c.Scopes, " "))
+	}
+	return retrieveToken(ctx, c, v)
+}
+
+// APIKeyToken converts a resource owner customerID and apiKey pair into a token.
+// The customerID is included in the apiKey.
+//
+// The provided context optionally controls which HTTP client is used. See the HTTPClient variable.
+func (c *Config) APIKeyToken(ctx context.Context, apiKey string) (*Token, error) {
+	v := url.Values{
+		"grant_type": {"api_key"},
+		"apikey":     {apiKey},
 	}
 	if len(c.Scopes) > 0 {
 		v.Set("scope", strings.Join(c.Scopes, " "))
